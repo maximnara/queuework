@@ -1,0 +1,23 @@
+{
+  "name": "job_manager",
+  "version": "1.0.0",
+  "description": "Job manager for NodeJs",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src/ -d dist",
+    "start": "npm run build && nodemon dist/index.js"
+  },
+  "author": "maximnara",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^8.0.0",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/preset-env": "^7.5.5"
+  }
+}
