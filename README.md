@@ -1,5 +1,10 @@
 # QueueWork - is super simple NodeJS queue and job manager.
 
+## Install
+```
+npm install queuework --save
+```
+
 ## How to use
 First define you own Job as follows:
 ```
@@ -14,7 +19,7 @@ class TestJob extends Job {
     return '* * * * *'; // This Job will be executed every minute every hour and so on.
   }
   
-  static handle(message) {
+  static handle(message) { // This handler will be executed on Job work.
     console.log(message);
   };
 }
@@ -40,6 +45,22 @@ class TestJob extends Job {
     return 2; // seconds
   }
 }
+```
+
+## Daemonize
+To deamonize you Job type on your server for example
+```
+nohup node daemons.js &
+```
+
+And in the `daemons.js` write:
+```
+import { TestJob } from './jobs/index.js';
+import * as polyfill from '@babel/polyfill';
+
+(async function () {
+  await TestJob.daemonize();
+})();
 ```
 
 ## Works with

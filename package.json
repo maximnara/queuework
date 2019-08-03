@@ -1,5 +1,5 @@
 {
-  "name": "job_manager",
+  "name": "queuework",
   "version": "1.0.0",
   "description": "Job manager for NodeJs",
   "main": "dist/index.js",
