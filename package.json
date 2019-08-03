@@ -9,6 +9,10 @@
     "start": "npm run build && nodemon dist/index.js"
   },
   "author": "maximnara",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/maximnara/queuework.git"
+  },
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.5",
