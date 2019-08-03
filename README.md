@@ -2,7 +2,7 @@
 
 ## Install
 ```
-npm install queuework --save
+npm install @maximnara/queuework --save
 ```
 
 ## How to use

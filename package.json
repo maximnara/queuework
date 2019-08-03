@@ -1,5 +1,5 @@
 {
-  "name": "maximnara/queuework",
+  "name": "@maximnara/queuework",
   "version": "1.0.0",
   "description": "Job manager for NodeJs",
   "main": "dist/index.js",
