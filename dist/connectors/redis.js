@@ -42,7 +42,6 @@ function Redis() {
       optional.password = password;
     }
 
-    console.log(port, host, optional);
     connection = _bluebird["default"].promisifyAll(redis.createClient(port, host, optional));
   }
 
