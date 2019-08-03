@@ -11,13 +11,19 @@
   "author": "maximnara",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.5.5",
+    "cron": "^1.7.1",
     "dotenv": "^8.0.0",
-    "redis": "^2.8.0"
+    "redis": "^2.8.0",
+    "sleep": "^6.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.5.5",
     "@babel/polyfill": "^7.4.4",
-    "@babel/preset-env": "^7.5.5"
+    "@babel/preset-env": "^7.5.5",
+    "@babel/runtime": "^7.5.5"
   }
 }

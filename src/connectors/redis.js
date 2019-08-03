@@ -1,4 +1,5 @@
 import * as redis from 'redis';
+import Promise from 'bluebird';
 
 function Redis() {
   let connection = null;
@@ -10,29 +11,26 @@ function Redis() {
     const password = process.env.REDIS_PASSWORD;
     const port = process.env.REDIS_PORT;
     
-    if (!uri || !uri.length) {
-      return connection = redis.createClient(uri);
+    if (uri && uri.length) {
+      connection = Promise.promisifyAll(redis.createClient(uri));
+      return connection;
     }
-    connection = redis.createClient(port, host, { user, password });
+    let optional = {};
+    if (user && user.length) {
+      optional.user = user;
+    }
+    if (password && password.length) {
+      optional.password = password;
+    }
+    connection = Promise.promisifyAll(redis.createClient(port, host, optional));
   };
   
-  function addNumberOfRetries(message) {
-    message = JSON.parse(message);
-    message.retries += message.retries;
-    return JSON.stringify(message);
-  }
-  
   this.addMessage = async (queue, msg) => {
-    return await connection.sadd(queue, JSON.stringify(msg || {}));
+    return await connection.saddAsync(queue, JSON.stringify(msg || {}));
   };
   
   this.getMessage = async (key) => {
-    return await connection.spop(key);
-  };
-  
-  this.rollbackMessage = async (message) => {
-    message = addNumberOfRetries(message);
-    await connection.rpush(message);
+    return await connection.spopAsync(key);
   };
   
   connect();

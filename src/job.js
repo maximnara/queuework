@@ -1,45 +1,60 @@
 import Queue from './queue';
+import { CronJob } from 'cron';
+import { sleep } from 'sleep';
 
-function Job() {
-  const DEFAULT_NAME = 'default';
-  let queue = null;
+class Job {
+  constructor(message) {
+    this.addMessage(message);
+  }
   
-  this.name = DEFAULT_NAME;
-  
-  this.config = ({ name }) => {
-    this.name = name;
-    queue = new Queue(name);
-    return this;
+  static get queue() {
+    return new Queue(this.name);
   };
   
-  this.handle = (func) => {
-    this.handleFunc = func;
-    return this;
+  static async addMessage(msg) {
+    return await this.queue.addMessage(msg);
   };
   
-  this.addMessage = async (msg) => {
-    return await queue.addMessage(msg);
-  };
-  
-  this.work = async () => {
-    if (!queue) {
+  static async work() {
+    if (!this.queue) {
       throw new Error('Queue not configured. Set env vars to connect.');
     }
-    let message = await queue.getMessage();
+    let message = await this.queue.getMessage();
     try {
-      this.handleFunc(message);
+      if (message) {
+        this.handle(message);
+      }
     } catch (err) {
-      await queue.rollbackMessage();
+      await this.queue.failMessage(this.numberOfRetries);
     }
     return this;
   };
   
-  this.daemonize = async (processCount) => {
-    // new pid in processCount processes
+  static async daemonize(processCount) {
+    if (this.schedule) {
+      new CronJob(this.schedule, this.work.bind(this), null, true);
+      return this;
+    }
     while (true) {
       await this.work();
+      sleep(this.waitBeforeMessage);
     }
   };
+  
+  // User overrided properties and functions.
+  static get numberOfRetries() {
+    return 5;
+  }
+  
+  static get schedule() {
+    return null;
+  }
+  
+  static get waitBeforeMessage() {
+    return 1;
+  }
+  
+  static handle() {};
 }
 
 export default Job;

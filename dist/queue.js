@@ -1,20 +1,23 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
 var _connectors = require("./connectors/");
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+var messageInProgress = null;
 
 function Queue(name) {
   var _this = this;
 
-  var messageInProgress = null;
   this.name = name;
   this.connection = null;
 
@@ -36,22 +39,55 @@ function Queue(name) {
     }
   };
 
+  var encodeMessage = function encodeMessage(message) {
+    return {
+      queue: _this.name,
+      retries: 0,
+      data: message
+    };
+  };
+
+  var decodeMessage = function decodeMessage(message) {
+    if (!message) {
+      return null;
+    }
+
+    if (!message.data) {
+      throw new Error('Message not original. Try to send messages via .addMessage() function.');
+    }
+
+    return message.data;
+  };
+
+  var addRetry = function addRetry(message) {
+    if (!message.retries) {
+      message.retries = 0;
+    }
+
+    message.retries = message.retries + 1;
+    return message;
+  };
+
   this.getKey = function () {
     return _this.name;
+  };
+
+  this.getFailedKey = function () {
+    return _this.name + '.Failed';
   };
 
   this.addMessage =
   /*#__PURE__*/
   function () {
-    var _ref = _asyncToGenerator(
+    var _ref = (0, _asyncToGenerator2["default"])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee(msg) {
-      return regeneratorRuntime.wrap(function _callee$(_context) {
+    _regenerator["default"].mark(function _callee(message) {
+      return _regenerator["default"].wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
               _context.next = 2;
-              return _this.connection.addMessage(_this.getKey(), msg);
+              return _this.connection.addMessage(_this.getKey(), encodeMessage(message));
 
             case 2:
               return _context.abrupt("return", _context.sent);
@@ -71,11 +107,11 @@ function Queue(name) {
 
   this.getMessage =
   /*#__PURE__*/
-  _asyncToGenerator(
+  (0, _asyncToGenerator2["default"])(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2() {
+  _regenerator["default"].mark(function _callee2() {
     var key, message;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -85,35 +121,53 @@ function Queue(name) {
 
           case 3:
             message = _context2.sent;
+            message = JSON.parse(message);
             messageInProgress = message;
-            return _context2.abrupt("return", message);
+            console.log(message);
+            return _context2.abrupt("return", decodeMessage(message));
 
-          case 6:
+          case 8:
           case "end":
             return _context2.stop();
         }
       }
     }, _callee2);
   }));
-  this.rollbackMessage =
-  /*#__PURE__*/
-  _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3() {
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            _context3.next = 2;
-            return _this.connection.rollbackMessage(messageInProgress);
 
-          case 2:
-          case "end":
-            return _context3.stop();
+  this.failMessage =
+  /*#__PURE__*/
+  function () {
+    var _ref3 = (0, _asyncToGenerator2["default"])(
+    /*#__PURE__*/
+    _regenerator["default"].mark(function _callee3(numberOfRetries) {
+      var message, key;
+      return _regenerator["default"].wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              message = addRetry(messageInProgress);
+              key = _this.getKey();
+
+              if (message.retries >= numberOfRetries) {
+                key = _this.getFailedKey();
+              }
+
+              _context3.next = 5;
+              return _this.connection.addMessage(key, message);
+
+            case 5:
+            case "end":
+              return _context3.stop();
+          }
         }
-      }
-    }, _callee3);
-  }));
+      }, _callee3);
+    }));
+
+    return function (_x2) {
+      return _ref3.apply(this, arguments);
+    };
+  }();
+
   init();
 }
 
