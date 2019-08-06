@@ -1,4 +1,4 @@
-import Redis from './redis';
+import { Redis } from './redis';
 import Rabbit from './rabbit';
 import DB from './db';
 

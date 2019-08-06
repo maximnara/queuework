@@ -7,107 +7,124 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.Redis = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var redis = _interopRequireWildcard(require("redis"));
 
 var _bluebird = _interopRequireDefault(require("bluebird"));
 
-function Redis() {
-  var connection = null;
+var connection = null;
 
-  function connect() {
-    var uri = process.env.REDIS_URI;
-    var host = process.env.REDIS_HOST;
-    var user = process.env.REDIS_USER;
-    var password = process.env.REDIS_PASSWORD;
-    var port = process.env.REDIS_PORT;
-
-    if (uri && uri.length) {
-      connection = _bluebird["default"].promisifyAll(redis.createClient(uri));
-      return connection;
-    }
-
-    var optional = {};
-
-    if (user && user.length) {
-      optional.user = user;
-    }
-
-    if (password && password.length) {
-      optional.password = password;
-    }
-
-    connection = _bluebird["default"].promisifyAll(redis.createClient(port, host, optional));
+var Redis =
+/*#__PURE__*/
+function () {
+  function Redis(config) {
+    (0, _classCallCheck2["default"])(this, Redis);
+    this.connect(config);
   }
 
-  ;
+  (0, _createClass2["default"])(Redis, [{
+    key: "connect",
+    value: function connect(config) {
+      config = config || {};
+      var uri = process.env.REDIS_URI || config.uri;
+      var host = process.env.REDIS_HOST || config.host;
+      var user = process.env.REDIS_USER || config.user;
+      var password = process.env.REDIS_PASSWORD || config.password;
+      var port = process.env.REDIS_PORT || config.port;
 
-  this.addMessage =
-  /*#__PURE__*/
-  function () {
-    var _ref = (0, _asyncToGenerator2["default"])(
-    /*#__PURE__*/
-    _regenerator["default"].mark(function _callee(queue, msg) {
-      return _regenerator["default"].wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.next = 2;
-              return connection.saddAsync(queue, JSON.stringify(msg || {}));
+      if (uri && uri.length) {
+        this.connection = _bluebird["default"].promisifyAll(Redis.getRedis().createClient(uri));
+        return connection;
+      }
 
-            case 2:
-              return _context.abrupt("return", _context.sent);
+      var optional = {};
 
-            case 3:
-            case "end":
-              return _context.stop();
+      if (user && user.length) {
+        optional.user = user;
+      }
+
+      if (password && password.length) {
+        optional.password = password;
+      }
+
+      this.connection = _bluebird["default"].promisifyAll(Redis.getRedis().createClient(port, host, optional));
+    }
+  }, {
+    key: "addMessage",
+    value: function () {
+      var _addMessage = (0, _asyncToGenerator2["default"])(
+      /*#__PURE__*/
+      _regenerator["default"].mark(function _callee(queue, msg) {
+        return _regenerator["default"].wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return this.connection.saddAsync(queue, JSON.stringify(msg || {}));
+
+              case 2:
+                return _context.abrupt("return", _context.sent);
+
+              case 3:
+              case "end":
+                return _context.stop();
+            }
           }
-        }
-      }, _callee);
-    }));
+        }, _callee, this);
+      }));
 
-    return function (_x, _x2) {
-      return _ref.apply(this, arguments);
-    };
-  }();
+      function addMessage(_x, _x2) {
+        return _addMessage.apply(this, arguments);
+      }
 
-  this.getMessage =
-  /*#__PURE__*/
-  function () {
-    var _ref2 = (0, _asyncToGenerator2["default"])(
-    /*#__PURE__*/
-    _regenerator["default"].mark(function _callee2(key) {
-      return _regenerator["default"].wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              _context2.next = 2;
-              return connection.spopAsync(key);
+      return addMessage;
+    }()
+  }, {
+    key: "getMessage",
+    value: function () {
+      var _getMessage = (0, _asyncToGenerator2["default"])(
+      /*#__PURE__*/
+      _regenerator["default"].mark(function _callee2(key) {
+        return _regenerator["default"].wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return this.connection.spopAsync(key);
 
-            case 2:
-              return _context2.abrupt("return", _context2.sent);
+              case 2:
+                return _context2.abrupt("return", _context2.sent);
 
-            case 3:
-            case "end":
-              return _context2.stop();
+              case 3:
+              case "end":
+                return _context2.stop();
+            }
           }
-        }
-      }, _callee2);
-    }));
+        }, _callee2, this);
+      }));
 
-    return function (_x3) {
-      return _ref2.apply(this, arguments);
-    };
-  }();
+      function getMessage(_x3) {
+        return _getMessage.apply(this, arguments);
+      }
 
-  connect();
-  return this;
-}
+      return getMessage;
+    }()
+  }], [{
+    key: "getRedis",
+    value: function getRedis() {
+      return redis;
+    }
+  }]);
+  return Redis;
+}();
 
-var _default = Redis;
-exports["default"] = _default;
+exports.Redis = Redis;

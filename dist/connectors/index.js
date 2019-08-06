@@ -8,7 +8,7 @@ Object.defineProperty(exports, "__esModule", {
 Object.defineProperty(exports, "Redis", {
   enumerable: true,
   get: function get() {
-    return _redis["default"];
+    return _redis.Redis;
   }
 });
 Object.defineProperty(exports, "Rabbit", {
@@ -24,7 +24,7 @@ Object.defineProperty(exports, "DB", {
   }
 });
 
-var _redis = _interopRequireDefault(require("./redis"));
+var _redis = require("./redis");
 
 var _rabbit = _interopRequireDefault(require("./rabbit"));
 

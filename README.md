@@ -42,7 +42,7 @@ It will run process in `while (true)` with sleep time for 2 seconds.
 ```
 class TestJob extends Job {
   static get waitBeforeMessage() {
-    return 2; // seconds
+    return 2000; // micro seconds
   }
 }
 ```

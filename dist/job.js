@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.Job = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
@@ -15,21 +15,25 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-var _queue = _interopRequireDefault(require("./queue"));
+var _queue = require("./queue");
 
 var _cron = require("cron");
 
-var _sleep = require("sleep");
+var _msleep = _interopRequireDefault(require("./tools/msleep"));
 
 var Job =
 /*#__PURE__*/
 function () {
-  function Job(message) {
+  function Job() {
     (0, _classCallCheck2["default"])(this, Job);
-    this.addMessage(message);
   }
 
   (0, _createClass2["default"])(Job, null, [{
+    key: "setConfig",
+    value: function setConfig(config) {
+      this.config = config;
+    }
+  }, {
     key: "addMessage",
     value: function () {
       var _addMessage = (0, _asyncToGenerator2["default"])(
@@ -135,7 +139,7 @@ function () {
 
               case 3:
                 if (!true) {
-                  _context3.next = 9;
+                  _context3.next = 10;
                   break;
                 }
 
@@ -143,11 +147,14 @@ function () {
                 return this.work();
 
               case 6:
-                (0, _sleep.sleep)(this.waitBeforeMessage);
+                _context3.next = 8;
+                return (0, _msleep["default"])(this.waitBeforeMessage);
+
+              case 8:
                 _context3.next = 3;
                 break;
 
-              case 9:
+              case 10:
               case "end":
                 return _context3.stop();
             }
@@ -167,7 +174,7 @@ function () {
   }, {
     key: "queue",
     get: function get() {
-      return new _queue["default"](this.name);
+      return new _queue.Queue(this.name, this.config);
     }
   }, {
     key: "numberOfRetries",
@@ -183,11 +190,10 @@ function () {
   }, {
     key: "waitBeforeMessage",
     get: function get() {
-      return 1;
+      return 1000;
     }
   }]);
   return Job;
 }();
 
-var _default = Job;
-exports["default"] = _default;
+exports.Job = Job;

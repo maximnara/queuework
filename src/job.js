@@ -1,15 +1,15 @@
-import Queue from './queue';
+import { Queue } from './queue';
 import { CronJob } from 'cron';
-import { sleep } from 'sleep';
+import msleep from './tools/msleep';
 
 class Job {
-  constructor(message) {
-    this.addMessage(message);
-  }
-  
   static get queue() {
-    return new Queue(this.name);
+    return new Queue(this.name, this.config);
   };
+  
+  static setConfig(config) {
+    this.config = config;
+  }
   
   static async addMessage(msg) {
     return await this.queue.addMessage(msg);
@@ -37,7 +37,7 @@ class Job {
     }
     while (true) {
       await this.work();
-      sleep(this.waitBeforeMessage);
+      await msleep(this.waitBeforeMessage);
     }
   };
   
@@ -51,10 +51,10 @@ class Job {
   }
   
   static get waitBeforeMessage() {
-    return 1;
+    return 1000;
   }
   
   static handle() {};
 }
 
-export default Job;
+export { Job };

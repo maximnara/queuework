@@ -5,171 +5,193 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.Queue = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _connectors = require("./connectors/");
 
 var messageInProgress = null;
 
-function Queue(name) {
-  var _this = this;
+var Queue =
+/*#__PURE__*/
+function () {
+  function Queue(name, config) {
+    (0, _classCallCheck2["default"])(this, Queue);
+    this.config = config || {};
+    this.name = name;
+    this.init();
+  }
 
-  this.name = name;
-  this.connection = null;
+  (0, _createClass2["default"])(Queue, [{
+    key: "init",
+    value: function init() {
+      var driver = process.env.QUEUE_DRIVER || this.config.driver;
 
-  var init = function init() {
-    var driver = process.env.QUEUE_DRIVER;
+      switch (driver) {
+        case 'redis':
+          this.connection = new _connectors.Redis(this.config);
+          break;
 
-    switch (driver) {
-      case 'redis':
-        _this.connection = new _connectors.Redis();
-        break;
+        case 'rabbit':
+          this.connection = new _connectors.Rabbit(this.config);
+          break;
 
-      case 'rabbit':
-        _this.connection = new _connectors.Rabbit();
-        break;
-
-      case 'db':
-        _this.connection = new _connectors.DB();
-        break;
-    }
-  };
-
-  var encodeMessage = function encodeMessage(message) {
-    return {
-      queue: _this.name,
-      retries: 0,
-      data: message
-    };
-  };
-
-  var decodeMessage = function decodeMessage(message) {
-    if (!message) {
-      return null;
-    }
-
-    if (!message.data) {
-      throw new Error('Message not original. Try to send messages via .addMessage() function.');
-    }
-
-    return message.data;
-  };
-
-  var addRetry = function addRetry(message) {
-    if (!message.retries) {
-      message.retries = 0;
-    }
-
-    message.retries = message.retries + 1;
-    return message;
-  };
-
-  this.getKey = function () {
-    return _this.name;
-  };
-
-  this.getFailedKey = function () {
-    return _this.name + '.Failed';
-  };
-
-  this.addMessage =
-  /*#__PURE__*/
-  function () {
-    var _ref = (0, _asyncToGenerator2["default"])(
-    /*#__PURE__*/
-    _regenerator["default"].mark(function _callee(message) {
-      return _regenerator["default"].wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.next = 2;
-              return _this.connection.addMessage(_this.getKey(), encodeMessage(message));
-
-            case 2:
-              return _context.abrupt("return", _context.sent);
-
-            case 3:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, _callee);
-    }));
-
-    return function (_x) {
-      return _ref.apply(this, arguments);
-    };
-  }();
-
-  this.getMessage =
-  /*#__PURE__*/
-  (0, _asyncToGenerator2["default"])(
-  /*#__PURE__*/
-  _regenerator["default"].mark(function _callee2() {
-    var key, message;
-    return _regenerator["default"].wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            key = _this.getKey();
-            _context2.next = 3;
-            return _this.connection.getMessage(key);
-
-          case 3:
-            message = _context2.sent;
-            message = JSON.parse(message);
-            messageInProgress = message;
-            console.log(message);
-            return _context2.abrupt("return", decodeMessage(message));
-
-          case 8:
-          case "end":
-            return _context2.stop();
-        }
+        case 'db':
+          this.connection = new _connectors.DB(this.config);
+          break;
       }
-    }, _callee2);
-  }));
+    }
+  }, {
+    key: "encodeMessage",
+    value: function encodeMessage(message) {
+      return {
+        queue: this.name,
+        retries: 0,
+        data: message
+      };
+    }
+  }, {
+    key: "decodeMessage",
+    value: function decodeMessage(message) {
+      if (!message) {
+        return null;
+      }
 
-  this.failMessage =
-  /*#__PURE__*/
-  function () {
-    var _ref3 = (0, _asyncToGenerator2["default"])(
-    /*#__PURE__*/
-    _regenerator["default"].mark(function _callee3(numberOfRetries) {
-      var message, key;
-      return _regenerator["default"].wrap(function _callee3$(_context3) {
-        while (1) {
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              message = addRetry(messageInProgress);
-              key = _this.getKey();
+      if (!message.data) {
+        throw new Error('Message not original. Try to send messages via .addMessage() function.');
+      }
 
-              if (message.retries >= numberOfRetries) {
-                key = _this.getFailedKey();
-              }
+      return message.data;
+    }
+  }, {
+    key: "addRetry",
+    value: function addRetry(message) {
+      if (!message.retries) {
+        message.retries = 0;
+      }
 
-              _context3.next = 5;
-              return _this.connection.addMessage(key, message);
+      message.retries = message.retries + 1;
+      return message;
+    }
+  }, {
+    key: "getKey",
+    value: function getKey() {
+      return this.name;
+    }
+  }, {
+    key: "getFailedKey",
+    value: function getFailedKey() {
+      return this.name + '.Failed';
+    }
+  }, {
+    key: "addMessage",
+    value: function () {
+      var _addMessage = (0, _asyncToGenerator2["default"])(
+      /*#__PURE__*/
+      _regenerator["default"].mark(function _callee(message) {
+        return _regenerator["default"].wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return this.connection.addMessage(this.getKey(), this.encodeMessage(message));
 
-            case 5:
-            case "end":
-              return _context3.stop();
+              case 2:
+                return _context.abrupt("return", _context.sent);
+
+              case 3:
+              case "end":
+                return _context.stop();
+            }
           }
-        }
-      }, _callee3);
-    }));
+        }, _callee, this);
+      }));
 
-    return function (_x2) {
-      return _ref3.apply(this, arguments);
-    };
-  }();
+      function addMessage(_x) {
+        return _addMessage.apply(this, arguments);
+      }
 
-  init();
-}
+      return addMessage;
+    }()
+  }, {
+    key: "getMessage",
+    value: function () {
+      var _getMessage = (0, _asyncToGenerator2["default"])(
+      /*#__PURE__*/
+      _regenerator["default"].mark(function _callee2() {
+        var key, message;
+        return _regenerator["default"].wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                key = this.getKey();
+                _context2.next = 3;
+                return this.connection.getMessage(key);
 
-var _default = Queue;
-exports["default"] = _default;
+              case 3:
+                message = _context2.sent;
+                message = JSON.parse(message);
+                messageInProgress = message;
+                return _context2.abrupt("return", this.decodeMessage(message));
+
+              case 7:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function getMessage() {
+        return _getMessage.apply(this, arguments);
+      }
+
+      return getMessage;
+    }()
+  }, {
+    key: "failMessage",
+    value: function () {
+      var _failMessage = (0, _asyncToGenerator2["default"])(
+      /*#__PURE__*/
+      _regenerator["default"].mark(function _callee3(numberOfRetries) {
+        var message, key;
+        return _regenerator["default"].wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                message = this.addRetry(messageInProgress);
+                key = this.getKey();
+
+                if (message.retries >= numberOfRetries) {
+                  key = this.getFailedKey();
+                }
+
+                _context3.next = 5;
+                return this.connection.addMessage(key, message);
+
+              case 5:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function failMessage(_x2) {
+        return _failMessage.apply(this, arguments);
+      }
+
+      return failMessage;
+    }()
+  }]);
+  return Queue;
+}();
+
+exports.Queue = Queue;

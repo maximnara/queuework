@@ -1,18 +1,23 @@
 import * as redis from 'redis';
 import Promise from 'bluebird';
+let connection = null;
 
-function Redis() {
-  let connection = null;
+class Redis {
   
-  function connect() {
-    const uri = process.env.REDIS_URI;
-    const host = process.env.REDIS_HOST;
-    const user = process.env.REDIS_USER;
-    const password = process.env.REDIS_PASSWORD;
-    const port = process.env.REDIS_PORT;
+  constructor(config) {
+    this.connect(config);
+  }
+  
+  connect(config) {
+    config = config || {};
+    const uri = process.env.REDIS_URI || config.uri;
+    const host = process.env.REDIS_HOST || config.host;
+    const user = process.env.REDIS_USER || config.user;
+    const password = process.env.REDIS_PASSWORD || config.password;
+    const port = process.env.REDIS_PORT || config.port;
     
     if (uri && uri.length) {
-      connection = Promise.promisifyAll(redis.createClient(uri));
+      this.connection = Promise.promisifyAll(Redis.getRedis().createClient(uri));
       return connection;
     }
     let optional = {};
@@ -22,19 +27,20 @@ function Redis() {
     if (password && password.length) {
       optional.password = password;
     }
-    connection = Promise.promisifyAll(redis.createClient(port, host, optional));
+    this.connection = Promise.promisifyAll(Redis.getRedis().createClient(port, host, optional));
   };
   
-  this.addMessage = async (queue, msg) => {
-    return await connection.saddAsync(queue, JSON.stringify(msg || {}));
+  static getRedis() {
+    return redis;
   };
   
-  this.getMessage = async (key) => {
-    return await connection.spopAsync(key);
+  async addMessage(queue, msg) {
+    return await this.connection.saddAsync(queue, JSON.stringify(msg || {}));
   };
   
-  connect();
-  return this;
+  async getMessage(key) {
+    return await this.connection.spopAsync(key);
+  };
 }
 
-export default Redis;
+export { Redis };
