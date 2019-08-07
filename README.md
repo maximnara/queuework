@@ -1,5 +1,11 @@
 # QueueWork - is super simple NodeJS queue and job manager.
 
+<p align="center">
+<a href="https://travis-ci.org/maximnara/queuework"><img src="https://travis-ci.org/maximnara/queuework.svg?branch=master" alt="Build Status"></a>
+<a href="https://www.npmjs.com/package/@maximnara/queuework"><img src="https://img.shields.io/npm/l/@maximnara/queuework" alt="License"></a>
+<a href="https://www.npmjs.com/package/@maximnara/queuework"><img src="https://img.shields.io/npm/dm/@maximnara/queuework" alt="Total Downloads"></a>
+</p>
+
 ## Install
 ```
 npm install @maximnara/queuework --save
