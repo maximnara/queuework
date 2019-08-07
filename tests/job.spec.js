@@ -20,6 +20,11 @@ beforeAll(() => {
 
 beforeEach(() => {
   Queue.mockClear();
+  addMessage.mockClear();
+  getMessage.mockClear();
+  failMessage.mockClear();
+  Job.handle = null;
+  Job.prototype.waitBeforeMessage = null;
 });
 
 test('should call queue addMessage', async function() {
@@ -44,4 +49,41 @@ test('should call retry message on error', async function() {
   expect(failMessage).toBeCalled();
 });
 
-// @TODO: add test for daemonize() and waitBeforeMessage
+test('should work when daemonized', async () => {
+  Job.handle = function(message) {
+    expect(message).toEqual('message');
+  };
+  Job.daemonize();
+  setTimeout(() => {
+    Job.stop();
+    expect(getMessage).toBeCalled();
+  }, 300);
+});
+
+test('should work when daemonized after some time', () => {
+  Job.prototype.waitBeforeMessage = 200;
+  Job.daemonize();
+  setTimeout(() => {
+    expect(getMessage.mock.calls.length).toEqual(1);
+  }, 300);
+  setTimeout(() => {
+    Job.stop();
+    expect(getMessage.mock.calls.length).toEqual(2);
+  }, 500);
+  setTimeout(() => {
+    expect(getMessage.mock.calls.length).toEqual(2);
+  }, 800);
+});
+
+test('should daemonize with schedule', () => {
+  Job.prototype.schedule = '* * * * *';
+  Job.prototype.waitBeforeMessage = 200;
+  Job.daemonize();
+  setTimeout(() => {
+    expect(getMessage.mock.calls.length).toEqual(1);
+  }, 50);
+  setTimeout(() => {
+    Job.stop();
+    expect(getMessage.mock.calls.length).toEqual(1);
+  }, 500);
+});

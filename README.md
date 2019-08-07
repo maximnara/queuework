@@ -34,7 +34,8 @@ await TestJob.addMessage({ hello: 'test1' });
 To daemonize or to execute one job:
 ```
 await TestJob.work(); // use await for work function. Node works faster than queue.
-await TestJob.daemonize(); // here as you wish
+await TestJob.daemonize(); // here if you will use await, next functions not be called and you will not have ability to stop daemon programmatically
+TestJob.stop(); // Stops daemon
 ```
 
 If you want to execute job more than one time a minute use `waitBeforeMessage` instead of `schedule`.

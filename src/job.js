@@ -32,14 +32,26 @@ class Job {
   
   static async daemonize(processCount) {
     if (this.schedule) {
-      new CronJob(this.schedule, this.work.bind(this), null, true);
+      this.daemon = new CronJob(this.schedule, this.work.bind(this), null, true, null, {}, true);
       return this;
     }
+    this.inProgress = true;
     while (true) {
+      if (!this.inProgress) {
+        break;
+      }
       await this.work();
       await msleep(this.waitBeforeMessage);
     }
   };
+  
+  static stop() {
+    this.inProgress = false;
+    if (this.daemon) {
+      this.daemon.stop();
+      this.daemon = null;
+    }
+  }
   
   // User overrided properties and functions.
   static get numberOfRetries() {

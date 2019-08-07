@@ -134,27 +134,38 @@ function () {
                   break;
                 }
 
-                new _cron.CronJob(this.schedule, this.work.bind(this), null, true);
+                this.daemon = new _cron.CronJob(this.schedule, this.work.bind(this), null, true, null, {}, true);
                 return _context3.abrupt("return", this);
 
               case 3:
+                this.inProgress = true;
+
+              case 4:
                 if (!true) {
-                  _context3.next = 10;
+                  _context3.next = 13;
                   break;
                 }
 
-                _context3.next = 6;
+                if (this.inProgress) {
+                  _context3.next = 7;
+                  break;
+                }
+
+                return _context3.abrupt("break", 13);
+
+              case 7:
+                _context3.next = 9;
                 return this.work();
 
-              case 6:
-                _context3.next = 8;
+              case 9:
+                _context3.next = 11;
                 return (0, _msleep["default"])(this.waitBeforeMessage);
 
-              case 8:
-                _context3.next = 3;
+              case 11:
+                _context3.next = 4;
                 break;
 
-              case 10:
+              case 13:
               case "end":
                 return _context3.stop();
             }
@@ -169,6 +180,18 @@ function () {
       return daemonize;
     }()
   }, {
+    key: "stop",
+    value: function stop() {
+      this.inProgress = false;
+
+      if (this.daemon) {
+        this.daemon.stop();
+        this.daemon = null;
+        console.log('this.daemon', null);
+      }
+    } // User overrided properties and functions.
+
+  }, {
     key: "handle",
     value: function handle() {}
   }, {
@@ -178,7 +201,6 @@ function () {
     }
   }, {
     key: "numberOfRetries",
-    // User overrided properties and functions.
     get: function get() {
       return 5;
     }
