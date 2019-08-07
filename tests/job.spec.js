@@ -11,7 +11,7 @@ beforeAll(() => {
   failMessage = jest.fn(() => true);
   Queue.mockImplementation(() => {
     return {
-      addMessage:addMessage,
+      addMessage: addMessage,
       getMessage: getMessage,
       failMessage: failMessage,
     };

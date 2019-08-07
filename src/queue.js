@@ -4,6 +4,9 @@ let messageInProgress = null;
 class Queue {
   
   constructor(name, config) {
+    if (!name || !name.length) {
+      throw new Error('Queue should have a name');
+    }
     this.config = config || {};
     this.name = name;
     this.init();
@@ -65,7 +68,9 @@ class Queue {
   async getMessage() {
     const key = this.getKey();
     let message = await this.connection.getMessage(key);  
-    message = JSON.parse(message);
+    if (message) {
+      message = JSON.parse(message);
+    }
     messageInProgress = message;
     return this.decodeMessage(message);
   }
@@ -77,6 +82,7 @@ class Queue {
       key = this.getFailedKey();
     }
     await this.connection.addMessage(key, message);
+    messageInProgress = null;
   }
 }
 

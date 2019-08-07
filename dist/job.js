@@ -187,7 +187,6 @@ function () {
       if (this.daemon) {
         this.daemon.stop();
         this.daemon = null;
-        console.log('this.daemon', null);
       }
     } // User overrided properties and functions.
 

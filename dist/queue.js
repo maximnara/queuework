@@ -24,6 +24,11 @@ var Queue =
 function () {
   function Queue(name, config) {
     (0, _classCallCheck2["default"])(this, Queue);
+
+    if (!name || !name.length) {
+      throw new Error('Queue should have a name');
+    }
+
     this.config = config || {};
     this.name = name;
     this.init();
@@ -137,7 +142,11 @@ function () {
 
               case 3:
                 message = _context2.sent;
-                message = JSON.parse(message);
+
+                if (message) {
+                  message = JSON.parse(message);
+                }
+
                 messageInProgress = message;
                 return _context2.abrupt("return", this.decodeMessage(message));
 
@@ -177,6 +186,9 @@ function () {
                 return this.connection.addMessage(key, message);
 
               case 5:
+                messageInProgress = null;
+
+              case 6:
               case "end":
                 return _context3.stop();
             }
