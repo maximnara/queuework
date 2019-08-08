@@ -1,6 +1,6 @@
 {
   "name": "@maximnara/queuework",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Job manager for NodeJs",
   "main": "dist/index.js",
   "scripts": {

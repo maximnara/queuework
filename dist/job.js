@@ -1,7 +1,5 @@
 "use strict";
 
-var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");
-
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
@@ -22,8 +20,6 @@ var _queue = require("./queue");
 var _cron = require("cron");
 
 var _msleep = _interopRequireDefault(require("./tools/msleep"));
-
-var _ = _interopRequireWildcard(require("lodash"));
 
 var Job =
 /*#__PURE__*/

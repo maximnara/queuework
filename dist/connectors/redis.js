@@ -67,13 +67,13 @@ function () {
     value: function () {
       var _addMessage = (0, _asyncToGenerator2["default"])(
       /*#__PURE__*/
-      _regenerator["default"].mark(function _callee(queue, msg) {
+      _regenerator["default"].mark(function _callee(queue, message) {
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 _context.next = 2;
-                return this.connection.saddAsync(queue, JSON.stringify(msg || {}));
+                return this.connection.saddAsync(queue, JSON.stringify(message || {}));
 
               case 2:
                 return _context.abrupt("return", _context.sent);
