@@ -9,6 +9,7 @@ beforeAll(() => {
   addMessage = jest.fn(() => true);
   getMessage = jest.fn(() => 'message');
   failMessage = jest.fn(() => true);
+  Job.setName('test');
   Queue.mockImplementation(() => {
     return {
       addMessage: addMessage,
