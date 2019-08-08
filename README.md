@@ -17,8 +17,27 @@ First define you own Job as follows:
 import { Job } from 'queuework';
 
 class TestJob extends Job {
+  static get name() {
+    return 'test'; // queue name
+  }
+  
   static get numberOfRetries() {
     return 3;
+  }
+  
+  /**
+   * You can define your config in some BaseJob in you project and then extend your class.
+   * Otherwise you can set configs via .env file or process.env.
+   */
+  static get config() {
+    return {
+      driver: 'redis',
+      uri: 'redis://127.0.0.1:6379',
+      //host: '127.0.0.1',
+      //user: '',
+      //password: '',
+      //port: 6379,
+    };
   }
   
   static get schedule() {
@@ -75,6 +94,7 @@ Now queue works with Redis only. In future it will be RabbitMQ and Database also
 
 ## How to configure
 Use env vars, it's handy. You can set them in `.env` file in you project.
+Otherwise use `config` property.
 
 ```
 QUEUE_DRIVER=redis
@@ -84,4 +104,28 @@ REDIS_HOST=127.0.0.1
 REDIS_USER=
 REDIS_PASSWORD=
 REDIS_PORT=6379
+```
+
+## ES5
+To use `queuework` with ES5 define you class:
+
+```
+function MyJob() {
+};
+MyJob.prototype = Object.create(queuework.Job);
+
+let job = new MyJob();
+job.setName('MyJob');
+job.setConfig({
+  driver: 'redis',
+  uri: 'redis://127.0.0.1:6379',
+});
+job.setWaitBeforeMessage(5000);
+job.setNumberOfRetries(3);
+job.handle = function (message) {
+  console.log(123, message);
+  throw new Error('User error');
+};
+
+module.exports = job;
 ```

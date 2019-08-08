@@ -1,5 +1,7 @@
 "use strict";
 
+var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");
+
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
@@ -21,6 +23,8 @@ var _cron = require("cron");
 
 var _msleep = _interopRequireDefault(require("./tools/msleep"));
 
+var _ = _interopRequireWildcard(require("lodash"));
+
 var Job =
 /*#__PURE__*/
 function () {
@@ -29,11 +33,6 @@ function () {
   }
 
   (0, _createClass2["default"])(Job, null, [{
-    key: "setConfig",
-    value: function setConfig(config) {
-      this.config = config;
-    }
-  }, {
     key: "addMessage",
     value: function () {
       var _addMessage = (0, _asyncToGenerator2["default"])(
@@ -191,27 +190,66 @@ function () {
     } // User overrided properties and functions.
 
   }, {
+    key: "setName",
+    value: function setName(name) {
+      this._name = name;
+    }
+  }, {
+    key: "setConfig",
+    value: function setConfig(config) {
+      this._config = config;
+    }
+  }, {
+    key: "setNumberOfRetries",
+    value: function setNumberOfRetries(numberOfRetries) {
+      this._numberOfRetries = numberOfRetries;
+    }
+  }, {
+    key: "setSchedule",
+    value: function setSchedule(schedule) {
+      this._schedule = schedule;
+    }
+  }, {
+    key: "setWaitBeforeMessage",
+    value: function setWaitBeforeMessage(waitBeforeMessage) {
+      this._waitBeforeMessage = waitBeforeMessage;
+    }
+  }, {
     key: "handle",
     value: function handle() {}
   }, {
     key: "queue",
     get: function get() {
+      if (!this.name) {
+        throw new Error('Queue should have a name');
+      }
+
       return new _queue.Queue(this.name, this.config);
+    }
+  }, {
+    key: "name",
+    get: function get() {
+      return this._name;
+    }
+  }, {
+    key: "config",
+    get: function get() {
+      return this._config || {};
     }
   }, {
     key: "numberOfRetries",
     get: function get() {
-      return 5;
+      return this._numberOfRetries || 5;
     }
   }, {
     key: "schedule",
     get: function get() {
-      return null;
+      return this._schedule;
     }
   }, {
     key: "waitBeforeMessage",
     get: function get() {
-      return 1000;
+      return this._waitBeforeMessage || 1000;
     }
   }]);
   return Job;
