@@ -123,7 +123,7 @@ job.setConfig({
 job.setWaitBeforeMessage(5000);
 job.setNumberOfRetries(3);
 job.handle = function (message) {
-  console.log(123, message);
+  console.log(message);
   throw new Error('User error');
 };
 
