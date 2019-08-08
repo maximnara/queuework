@@ -41,6 +41,10 @@ function () {
       var password = process.env.REDIS_PASSWORD || config.password;
       var port = process.env.REDIS_PORT || config.port;
 
+      if (!uri && !host && !port || host && !port || !host && port) {
+        throw new Error('Redis cannot be configured, set uri or port, host.');
+      }
+
       if (uri && uri.length) {
         this.connection = _bluebird["default"].promisifyAll(Redis.getRedis().createClient(uri));
         return connection;

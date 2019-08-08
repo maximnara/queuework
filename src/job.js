@@ -1,7 +1,6 @@
 import { Queue } from './queue';
 import { CronJob } from 'cron';
 import msleep from './tools/msleep';
-import * as _ from 'lodash';
 
 class Job {
   static get queue() {

@@ -76,3 +76,40 @@ test('queue get and decode message', async () => {
   expect(queue.connection.getMessage).toBeCalled();
   expect(message).toEqual({ hello: 'test' });
 });
+
+test('message encoded correctly', () => {
+  const queue = new Queue('Job', { driver: 'redis' });
+  const message = { hello: 'test' };
+  const expectedMessageStructure = {
+    queue: 'Job',
+    retries: 0,
+    data: message,
+  };
+  expect(queue.encodeMessage(message)).toEqual(expectedMessageStructure);
+});
+
+test('message decoded correctly', () => {
+  const queue = new Queue('Job', { driver: 'redis' });
+  const message = { hello: 'test' };
+  const messageStructure = {
+    queue: 'Job',
+    retries: 0,
+    data: message,
+  };
+  expect(queue.decodeMessage(messageStructure)).toEqual(message);
+});
+
+test('add retries correctly', () => {
+  const queue = new Queue('Job', { driver: 'redis' });
+  const message = { hello: 'test' };
+  const messageStructure = {
+    queue: 'Job',
+    retries: 0,
+    data: message,
+  };
+  expect(queue.addRetry(messageStructure)).toEqual({
+    queue: 'Job',
+    retries: 1,
+    data: message,
+  });
+});

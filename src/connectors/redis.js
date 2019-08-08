@@ -16,6 +16,9 @@ class Redis {
     const password = process.env.REDIS_PASSWORD || config.password;
     const port = process.env.REDIS_PORT || config.port;
     
+    if (!uri && !host && !port || host && !port || !host && port) {
+      throw new Error('Redis cannot be configured, set uri or port, host.');
+    }
     if (uri && uri.length) {
       this.connection = Promise.promisifyAll(Redis.getRedis().createClient(uri));
       return connection;
@@ -34,8 +37,8 @@ class Redis {
     return redis;
   };
   
-  async addMessage(queue, msg) {
-    return await this.connection.saddAsync(queue, JSON.stringify(msg || {}));
+  async addMessage(queue, message) {
+    return await this.connection.saddAsync(queue, JSON.stringify(message || {}));
   };
   
   async getMessage(key) {
