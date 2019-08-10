@@ -1,4 +1,4 @@
-import { Redis } from '../dist/connectors/redis';
+import { Redis } from '../src/connectors/redis';
 const redis = jest.genMockFromModule('redis');
 
 beforeEach(() => {

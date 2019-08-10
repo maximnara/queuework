@@ -1,8 +1,8 @@
-import { Queue } from '../dist/queue';
-import { Redis, Rabbit, DB } from '../dist/connectors/';
-jest.mock('../dist/connectors/redis');
-jest.mock('../dist/connectors/rabbit');
-jest.mock('../dist/connectors/db');
+import { Queue } from '../src/queue';
+import { Redis, Rabbit, DB } from '../src/connectors/';
+jest.mock('../src/connectors/redis');
+jest.mock('../src/connectors/rabbit');
+jest.mock('../src/connectors/db');
 
 let addMessage;
 let getMessage;

@@ -1,6 +1,6 @@
-import { Queue } from '../dist/queue';
-const { Job } = require('../dist/job.js');
-jest.mock('../dist/queue');
+import { Queue } from '../src/queue';
+const { Job } = require('../src/job');
+jest.mock('../src/queue');
 
 let addMessage;
 let getMessage;
