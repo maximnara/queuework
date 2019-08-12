@@ -21,7 +21,8 @@ class Job {
     let message = await this.queue.getMessage();
     try {
       if (message) {
-        this.handle(message);
+        await this.handle(message);
+        await this.queue.commitMessage();
       }
     } catch (err) {
       await this.queue.failMessage(this.numberOfRetries);
@@ -93,7 +94,7 @@ class Job {
     this._waitBeforeMessage = waitBeforeMessage;
   }
   
-  static handle() {};
+  static async handle() {};
 }
 
 export { Job };

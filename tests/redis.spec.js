@@ -4,7 +4,7 @@ const redis = jest.genMockFromModule('redis');
 beforeEach(() => {
   redis.createClient.mockReturnValue({
     saddAsync: jest.fn(),
-    spopAsync: jest.fn(),
+    spopAsync: jest.fn().mockReturnValue(JSON.stringify({ queue: 'queue', retries: 0, data: { hello: 'test' } })),
   });
   Redis.getRedis = () => redis;
   delete process.env.REDIS_URI;
@@ -80,10 +80,10 @@ test('should throw error on no params', () => {
 });
 
 test('should pop on getMessage', () => {
-  let key = 'key';
+  let queue = 'queue';
   let redisConnector = new Redis({ uri: 'redis://test' });
-  redisConnector.getMessage(key);
-  expect(redisConnector.connection.spopAsync).toBeCalledWith(key);
+  redisConnector.getMessage(queue);
+  expect(redisConnector.connection.spopAsync).toBeCalledWith(queue);
 });
 
 test('should sadd on addMessage', () => {
@@ -91,8 +91,55 @@ test('should sadd on addMessage', () => {
   let message = { message: 'test' };
   let redisConnector = new Redis({ uri: 'redis://test' });
   redisConnector.addMessage(queue, message);
-  expect(redisConnector.connection.saddAsync).toBeCalledWith(queue, JSON.stringify(message));
+  let preparedMessage = JSON.stringify(redisConnector.encodeMessage(queue, message));
+  expect(redisConnector.connection.saddAsync).toBeCalledWith(queue, preparedMessage);
   
+  preparedMessage = JSON.stringify(redisConnector.encodeMessage(queue, null));
   redisConnector.addMessage(queue, null);
-  expect(redisConnector.connection.saddAsync).toBeCalledWith(queue, JSON.stringify({}));
+  expect(redisConnector.connection.saddAsync).toBeCalledWith(queue, preparedMessage);
+});
+
+test('queue add previous message on fail', async () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  let message = await redisConnector.getMessage('queue');
+  message = JSON.stringify(redisConnector.addRetry(redisConnector.encodeMessage('queue', message)));
+  await redisConnector.failMessage(3);
+  expect(redisConnector.connection.saddAsync).toBeCalledWith('queue', message);
+});
+
+test('message encoded correctly', () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  const message = { hello: 'test' };
+  const expectedMessageStructure = {
+    queue: 'Job',
+    retries: 0,
+    data: message,
+  };
+  expect(redisConnector.encodeMessage('Job', message)).toEqual(expectedMessageStructure);
+});
+
+test('message decoded correctly', () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  const message = { hello: 'test' };
+  const messageStructure = {
+    queue: 'Job',
+    retries: 0,
+    data: message,
+  };
+  expect(redisConnector.decodeMessage(messageStructure)).toEqual(message);
+});
+
+test('add retries correctly', () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  const message = { hello: 'test' };
+  const messageStructure = {
+    queue: 'Job',
+    retries: 0,
+    data: message,
+  };
+  expect(redisConnector.addRetry(messageStructure)).toEqual({
+    queue: 'Job',
+    retries: 1,
+    data: message,
+  });
 });

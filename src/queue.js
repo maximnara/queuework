@@ -1,5 +1,4 @@
 import { Redis, Rabbit, DB } from './connectors/';
-let messageInProgress = null;
 
 class Queue {
   
@@ -27,62 +26,20 @@ class Queue {
     }
   }
   
-  encodeMessage(message) {
-    return {
-      queue: this.name,
-      retries: 0,
-      data: message,
-    };
-  }
-  
-  decodeMessage(message) {
-    if (!message) {
-      return null;
-    }
-    if (!message.data) {
-      throw new Error('Message not original. Try to send messages via .addMessage() function.');
-    }
-    return message.data;
-  }
-  
-  addRetry(message) {
-    if (!message.retries) {
-      message.retries = 0;
-    }
-    message.retries = message.retries + 1;
-    return message;
-  }
-  
-  getKey() {
-    return this.name;
-  }
-  
-  getFailedKey() {
-    return this.name + '.Failed';
-  }
-  
   async addMessage(message) {
-    return await this.connection.addMessage(this.getKey(), this.encodeMessage(message));
+    return await this.connection.addMessage(this.name, message);
   }
   
   async getMessage() {
-    const key = this.getKey();
-    let message = await this.connection.getMessage(key);  
-    if (message) {
-      message = JSON.parse(message);
-    }
-    messageInProgress = message;
-    return this.decodeMessage(message);
+    return await this.connection.getMessage(this.name);  
+  }
+  
+  async commitMessage() {
+    return await this.connection.commitMessage();  
   }
   
   async failMessage(numberOfRetries) {
-    let message = this.addRetry(messageInProgress);
-    let key = this.getKey();
-    if (message.retries >= numberOfRetries) {
-      key = this.getFailedKey();
-    }
-    await this.connection.addMessage(key, message);
-    messageInProgress = null;
+    return await this.connection.failMessage(numberOfRetries);
   }
 }
 

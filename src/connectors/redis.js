@@ -1,6 +1,7 @@
 import * as redis from 'redis';
 import Promise from 'bluebird';
 let connection = null;
+let messageInProgress = null;
 
 class Redis {
   
@@ -37,13 +38,67 @@ class Redis {
     return redis;
   };
   
+  encodeMessage(queue, message) {
+    return {
+      queue,
+      retries: 0,
+      data: message,
+    };
+  }
+  
+  decodeMessage(message) {
+    if (!message) {
+      return null;
+    }
+    if (!message.data) {
+      throw new Error('Message not original. Try to send messages via .addMessage() function.');
+    }
+    return message.data;
+  }
+  
+  addRetry(message) {
+    if (!message.retries) {
+      message.retries = 0;
+    }
+    message.retries = message.retries + 1;
+    return message;
+  }
+  
+  getKey() {
+    return this.name;
+  }
+  
+  getFailedKey() {
+    return this.name + '.Failed';
+  }
+  
   async addMessage(queue, message) {
-    return await this.connection.saddAsync(queue, JSON.stringify(message || {}));
+    let encodedMessage = this.encodeMessage(queue, message);
+    return await this.connection.saddAsync(queue, JSON.stringify(encodedMessage));
   };
   
-  async getMessage(key) {
-    return await this.connection.spopAsync(key);
+  async getMessage(queue) {
+    let message = await this.connection.spopAsync(queue);
+    if (message) {
+      message = JSON.parse(message);
+    }
+    messageInProgress = message;
+    return this.decodeMessage(message);
   };
+  
+  async commitMessage() {
+    
+  }
+  
+  async failMessage(numberOfRetries) {
+    let message = this.addRetry(messageInProgress);
+    let key = this.getKey();
+    if (message.retries >= numberOfRetries) {
+      key = this.getFailedKey();
+    }
+    await this.connection.saddAsync(message.queue, JSON.stringify(message));
+    messageInProgress = null;
+  }
 }
 
 export { Redis };
