@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "just_test": "jest",
-    "test": "NODE_ENV=feature/travis jest --notify --coverage --coverageReporters=text-lcov | coveralls",
+    "test": "NODE_ENV=feature/travis jest --notify --coverage --coverageReporters=text-lcov --collectCoverageFrom=src/**/*.js --collectCoverageFrom=!src/db/**/*.js --collectCoverageFrom=!src/index.js | coveralls",
     "build": "babel src/ -d dist",
     "start": "npm run build && nodemon dist/index.js"
   },
@@ -15,15 +15,6 @@
     "url": "https://github.com/maximnara/queuework.git"
   },
   "license": "MIT",
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.js"
-    ],
-    "testPathIgnorePatterns" : [
-      "src/db/**/*.js",
-      "src/index.js"
-    ]
-  },
   "dependencies": {
     "bluebird": "^3.5.5",
     "cron": "^1.7.1",
