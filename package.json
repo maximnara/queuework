@@ -17,7 +17,7 @@
   "license": "MIT",
   "jest": {
     "collectCoverageFrom": [
-      "src/**/*.js",
+      "src/**/*.js"
     ],
     "testPathIgnorePatterns" : [
       "src/db/**/*.js",
