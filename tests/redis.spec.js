@@ -79,11 +79,12 @@ test('should throw error on no params', () => {
   }).not.toThrow();
 });
 
-test('should pop on getMessage', () => {
+test('should pop on getMessage', async () => {
   let queue = 'queue';
   let redisConnector = new Redis({ uri: 'redis://test' });
-  redisConnector.getMessage(queue);
+  let message = await redisConnector.getMessage(queue);
   expect(redisConnector.connection.spopAsync).toBeCalledWith(queue);
+  expect(message).toEqual({ hello: 'test' });
 });
 
 test('should sadd on addMessage', () => {
@@ -99,12 +100,74 @@ test('should sadd on addMessage', () => {
   expect(redisConnector.connection.saddAsync).toBeCalledWith(queue, preparedMessage);
 });
 
+test('should encode message', () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  let message = {hello: 'test'};
+  let queue = 'testqueue';
+  let expectedMessage = {
+    queue,
+    retries: 0,
+    data: message,
+  };
+  expect(redisConnector.encodeMessage(queue, message)).toEqual(expectedMessage);
+});
+
+test('should decode message', () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  let message = {hello: 'test'};
+  let queue = 'testqueue';
+  let encodedMessage = {
+    queue,
+    retries: 0,
+    data: message,
+  };
+  expect(redisConnector.decodeMessage(encodedMessage)).toEqual(message);
+  expect(redisConnector.decodeMessage(null)).toEqual(null);
+  
+  let wrongMessage = {
+    queue,
+    retries: 0,
+  };
+  expect(() => {
+    redisConnector.decodeMessage(wrongMessage);
+  }).toThrow();
+});
+
+test('should add retry', () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  let message = {hello: 'test'};
+  let queue = 'testqueue';
+  let encodedMessage = {
+    queue,
+    retries: 0,
+    data: message,
+  };
+  let modifiedMessage = Object.assign({}, encodedMessage);
+  modifiedMessage.retries += 1;
+  expect(redisConnector.addRetry(encodedMessage)).toEqual(modifiedMessage);
+  expect(redisConnector.addRetry({})).toEqual({ retries: 1 });
+});
+
+test('should return failed key', () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  expect(redisConnector.getFailedKey('queue')).toEqual('queue.failed');
+});
+
 test('queue add previous message on fail', async () => {
   let redisConnector = new Redis({ uri: 'redis://test' });
   let message = await redisConnector.getMessage('queue');
   message = JSON.stringify(redisConnector.addRetry(redisConnector.encodeMessage('queue', message)));
   await redisConnector.failMessage(3);
   expect(redisConnector.connection.saddAsync).toBeCalledWith('queue', message);
+});
+
+test('queue add previous message to failed queue', async () => {
+  let redisConnector = new Redis({ uri: 'redis://test' });
+  let message = await redisConnector.getMessage('queue');
+  expect(redisConnector.connection.spopAsync).toBeCalled();
+  message = redisConnector.addRetry(redisConnector.encodeMessage('queue', message));
+  await redisConnector.failMessage(1);
+  expect(redisConnector.connection.saddAsync).toBeCalledWith(redisConnector.getFailedKey(message.queue), JSON.stringify(message));
 });
 
 test('message encoded correctly', () => {
