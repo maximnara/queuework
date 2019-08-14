@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     queue: DataTypes.STRING,
     data: DataTypes.TEXT,
     retries: DataTypes.INTEGER(11).UNSIGNED,
+    reserved_at: DataTypes.DATE,
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE
   }, {

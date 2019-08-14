@@ -47,7 +47,7 @@ class Job {
 
   static async daemonize(processCount) {
     if (this.schedule) {
-      this.daemon = new _cron.CronJob(this.schedule, this.work.bind(this), null, true, null, {}, true);
+      this.daemon = new _cron.CronJob(this.schedule, this.handle.bind(this), null, true, null, {}, true);
       return this;
     }
 

@@ -84,12 +84,8 @@ class Redis {
     return message;
   }
 
-  getKey() {
-    return this.name;
-  }
-
-  getFailedKey() {
-    return this.name + '.Failed';
+  getFailedKey(queue) {
+    return queue + '.failed';
   }
 
   async addMessage(queue, message) {
@@ -112,13 +108,13 @@ class Redis {
 
   async failMessage(numberOfRetries) {
     let message = this.addRetry(messageInProgress);
-    let key = this.getKey();
+    let key = message.queue;
 
     if (message.retries >= numberOfRetries) {
-      key = this.getFailedKey();
+      key = this.getFailedKey(message.queue);
     }
 
-    await this.connection.saddAsync(message.queue, JSON.stringify(message));
+    await this.connection.saddAsync(key, JSON.stringify(message));
     messageInProgress = null;
   }
 

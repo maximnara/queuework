@@ -44,7 +44,10 @@ class DB {
   };
   
   async getMessage(queue) {
-    let message = await this.models.job.findOne({ where: { queue }, order: [['id', 'asc']] });
+    let message = await this.models.job.findOne({ where: { queue, reserved_at: null }, order: [['id', 'asc']] });
+    if (message) {
+      await message.update({ reserved_at: +new Date() });
+    }
     messageInProgress = message;
     return message ? JSON.parse(message.data) : null;
   };
