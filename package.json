@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "just_test": "jest",
-    "test": "NODE_ENV=feature/travis jest --notify --coverage --coverageReporters=text-lcov --collectCoverageFrom=src/**/*.js --collectCoverageFrom=!db/* | coveralls",
+    "test": "NODE_ENV=feature/travis jest --notify --coverage --coverageReporters=text-lcov --collectCoverageFrom=src/**/*.js --collectCoverageFrom=!db/**/*.js | coveralls",
     "build": "babel src/ -d dist",
     "start": "npm run build && nodemon dist/index.js"
   },
