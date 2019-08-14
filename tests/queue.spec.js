@@ -25,6 +25,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   Redis.mockClear();
+  DB.mockClear();
   addMessage.mockClear();
   getMessage.mockClear();
   failMessage.mockClear();
@@ -42,9 +43,9 @@ test('should connect to Redis adapter', () => {
 test('should connect to DB adapter', () => {
   const config = { driver: 'db', uri: 'postgres://' };
   new Queue('Job', config);
-  expect(Redis).toBeCalled(config);
+  expect(Redis).not.toBeCalled();
   expect(Rabbit).not.toBeCalled();
-  expect(DB).not.toBeCalledWith(config);
+  expect(DB).toBeCalledWith(config);
 });
 
 test('Redis connector should work with env config', () => {
@@ -58,9 +59,9 @@ test('Redis connector should work with env config', () => {
 test('DB connector should work with env config', () => {
   process.env.QUEUE_DRIVER = 'db';
   new Queue('Job');
-  expect(Redis).toBeCalled();
+  expect(Redis).not.toBeCalled();
   expect(Rabbit).not.toBeCalled();
-  expect(DB).not.toBeCalledWith({});
+  expect(DB).toBeCalledWith({});
 });
 
 test('should throw error when no name', () => {
