@@ -55,10 +55,16 @@ test('queue add prepared message to right queue', async () => {
   expect(queue.connection.addMessage).toBeCalledWith(queue.name, message);
 });
 
-test('queue add previous message on fail', async () => {
+test('queue calls fail', async () => {
   const queue = new Queue('Job', { driver: 'redis' });
   let message = await queue.getMessage();
   expect(queue.connection.getMessage).toBeCalled();
   await queue.failMessage(3);
   expect(queue.connection.failMessage).toBeCalledWith(3);
+});
+
+test('queue calls get message', async () => {
+  const queue = new Queue('Job', { driver: 'redis' });
+  let message = await queue.getMessage();
+  expect(queue.connection.getMessage).toBeCalledWith(queue.name);
 });

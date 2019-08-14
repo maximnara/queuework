@@ -5,16 +5,19 @@ jest.mock('../src/queue');
 let addMessage;
 let getMessage;
 let failMessage;
+let commitMessage;
 beforeAll(() => {
   addMessage = jest.fn(() => true);
   getMessage = jest.fn(() => 'message');
   failMessage = jest.fn(() => true);
+  commitMessage = jest.fn(() => true);
   Job.setName('test');
   Queue.mockImplementation(() => {
     return {
       addMessage: addMessage,
       getMessage: getMessage,
       failMessage: failMessage,
+      commitMessage: commitMessage,
     };
   });
 });
@@ -24,6 +27,7 @@ beforeEach(() => {
   addMessage.mockClear();
   getMessage.mockClear();
   failMessage.mockClear();
+  commitMessage.mockClear();
   Job.handle = null;
   Job.prototype.waitBeforeMessage = null;
 });
@@ -40,6 +44,7 @@ test('should call handle', async function() {
   };
   await Job.work();
   expect(getMessage).toBeCalled();
+  expect(commitMessage).toBeCalled();
 });
 
 test('should call retry message on error', async function() {
@@ -50,7 +55,8 @@ test('should call retry message on error', async function() {
   expect(failMessage).toBeCalled();
 });
 
-test('should work when daemonized', async () => {
+test('should work when daemonized', (done) => {
+  Job.prototype.waitBeforeMessage = 200;
   Job.handle = function(message) {
     expect(message).toEqual('message');
   };
@@ -58,33 +64,17 @@ test('should work when daemonized', async () => {
   setTimeout(() => {
     Job.stop();
     expect(getMessage).toBeCalled();
-  }, 300);
+    done();
+  }, 100);
 });
 
-test('should work when daemonized after some time', () => {
-  Job.prototype.waitBeforeMessage = 200;
-  Job.daemonize();
-  setTimeout(() => {
-    expect(getMessage.mock.calls.length).toEqual(1);
-  }, 300);
-  setTimeout(() => {
-    Job.stop();
-    expect(getMessage.mock.calls.length).toEqual(2);
-  }, 500);
-  setTimeout(() => {
-    expect(getMessage.mock.calls.length).toEqual(2);
-  }, 800);
-});
-
-test('should daemonize with schedule', () => {
+test('should daemonize with schedule', (done) => {
   Job.prototype.schedule = '* * * * *';
   Job.prototype.waitBeforeMessage = 200;
   Job.daemonize();
   setTimeout(() => {
-    expect(getMessage.mock.calls.length).toEqual(1);
-  }, 50);
-  setTimeout(() => {
     Job.stop();
     expect(getMessage.mock.calls.length).toEqual(1);
-  }, 500);
+    done();
+  }, 600);
 });

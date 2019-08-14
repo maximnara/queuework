@@ -32,7 +32,7 @@ class Job {
   
   static async daemonize(processCount) {
     if (this.schedule) {
-      this.daemon = new CronJob(this.schedule, this.work.bind(this), null, true, null, {}, true);
+      this.daemon = new CronJob(this.schedule, this.handle.bind(this), null, true, null, {}, true);
       return this;
     }
     this.inProgress = true;
