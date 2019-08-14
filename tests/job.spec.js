@@ -11,7 +11,6 @@ beforeAll(() => {
   getMessage = jest.fn(() => 'message');
   failMessage = jest.fn(() => true);
   commitMessage = jest.fn(() => true);
-  Job.setName('test');
   Queue.mockImplementation(() => {
     return {
       addMessage: addMessage,
@@ -28,8 +27,16 @@ beforeEach(() => {
   getMessage.mockClear();
   failMessage.mockClear();
   commitMessage.mockClear();
+  Job.setName('test');
   Job.handle = null;
   Job.prototype.waitBeforeMessage = null;
+});
+
+test('should throw error when no name', () => {
+  Job.setName(null);
+  expect(() => {
+    Job.queue;
+  }).toThrow();
 });
 
 test('should call queue addMessage', async function() {
@@ -77,4 +84,24 @@ test('should daemonize with schedule', (done) => {
     expect(getMessage.mock.calls.length).toEqual(1);
     done();
   }, 600);
+});
+
+test('set config', () => {
+  Job.setConfig({ uri: 'postgres://' });
+  expect(Job.config).toEqual({ uri: 'postgres://' });
+});
+
+test('set set number of retries', () => {
+  Job.setNumberOfRetries(5);
+  expect(Job.numberOfRetries).toEqual(5);
+});
+
+test('set set schedule', () => {
+  Job.setSchedule('* * * * *');
+  expect(Job.schedule).toEqual('* * * * *');
+});
+
+test('set set wait before message', () => {
+  Job.setWaitBeforeMessage(200);
+  expect(Job.waitBeforeMessage).toEqual(200);
 });

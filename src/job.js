@@ -15,9 +15,6 @@ class Job {
   };
   
   static async work() {
-    if (!this.queue) {
-      throw new Error('Queue not configured. Set env vars to connect.');
-    }
     let message = await this.queue.getMessage();
     try {
       if (message) {
