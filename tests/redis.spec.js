@@ -1,12 +1,15 @@
 import { Redis } from '../src/connectors/redis';
 const redis = jest.genMockFromModule('redis');
 
-beforeEach(() => {
+beforeAll(() => {
   redis.createClient.mockReturnValue({
     saddAsync: jest.fn(),
     spopAsync: jest.fn().mockReturnValue(JSON.stringify({ queue: 'queue', retries: 0, data: { hello: 'test' } })),
   });
   Redis.getRedis = () => redis;
+});
+
+beforeEach(() => {
   delete process.env.REDIS_URI;
   delete process.env.REDIS_PORT;
   delete process.env.REDIS_HOST;
@@ -20,7 +23,7 @@ test('should connect by uri', () => {
   expect(redis.createClient).toBeCalledWith(testUri);
   
   process.env.REDIS_URI = testUri;
-  new Redis({ uri: testUri });
+  new Redis();
   expect(redis.createClient).toBeCalledWith(testUri);
 });
 

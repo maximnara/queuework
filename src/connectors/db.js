@@ -40,6 +40,9 @@ class DB {
   };
   
   async addMessage(queue, message) {
+    if (!queue || !queue.length) {
+      throw new Error('To add message you should specify queue');
+    }
     return await this.models.job.create({ queue, data: JSON.stringify(message || {}), retries: 0});
   };
   
